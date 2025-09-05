@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cutepikachu.flowable.mapper.FlowableProcessDefinitionMapper">
+    <resultMap id="FlowableProcessDefinition" type="cn.cutepikachu.flowable.model.entity.FlowableProcessDefinition">
+        <id column="id" property="id"/>
+        <result column="process_definition_key" property="processDefinitionKey"/>
+        <result column="process_name" property="processName"/>
+        <result column="process_version" property="processVersion"/>
+        <result column="gmt_created_time" property="gmtCreatedTime"/>
+        <result column="gmt_last_modified_time" property="gmtLastModifiedTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        `id`,
+        `process_definition_key`,
+        `process_name`,
+        `process_version`,
+        `gmt_created_time`,
+        `gmt_last_modified_time`,
+        `is_deleted`
+    </sql>
+
+    <select id="listLatestProcessDefinition" resultMap="FlowableProcessDefinition">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM flowable_process_definition pd
+        WHERE pd.is_deleted = 0
+        AND pd.process_version = (
+            SELECT MAX(t.process_version)
+            FROM flowable_process_definition t
+            WHERE t.process_definition_key = pd.process_definition_key
+            AND t.is_deleted = 0
+        )
+        ORDER BY pd.gmt_created_time DESC
+    </select>
+
+</mapper>

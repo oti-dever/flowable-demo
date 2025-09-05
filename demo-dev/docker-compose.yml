@@ -1,0 +1,54 @@
+version: '3.7'
+
+services:
+  flowable: # 不需要部署到线上
+    image: flowable/flowable-ui:6.8.0
+    container_name: demo-flowable
+    environment:
+      - FLOWABLE_DATABASE_TYPE=mysql
+      - FLOWABLE_DATABASE_DRIVER=com.mysql.cj.jdbc.Driver
+      - FLOWABLE_DATABASE_URL=jdbc:mysql://mysql:3306/demo_db?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true&nullCatalogMeansCurrent=true
+      - FLOWABLE_DATABASE_USERNAME=root
+      - FLOWABLE_DATABASE_PASSWORD=123456
+      - FLOWABLE_IDM_APP_ADMIN_USER_ID=admin
+      - FLOWABLE_IDM_APP_ADMIN_PASSWORD=admin
+      - TZ=Asia/Shanghai
+    ports:
+      - "7070:8080"
+    depends_on:
+      - mysql
+    volumes:
+      - flowable_data:/flowable-data
+    networks:
+      - elk_network
+  mysql:
+    image: mysql:8.4.1
+    container_name: demo-mysql
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: 123456
+      TZ: Asia/Shanghai
+    ports:
+      - "6033:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - elk_network
+  redis:
+    image: redis:7.2.5-alpine3.20
+    container_name: demo-redis
+    ports:
+      - "9736:6379"
+    volumes:
+      - redis_data:/data  # 持久化卷
+    networks:
+      - elk_network
+volumes:
+  mysql_data: # 添加 MySQL 卷
+    driver: local
+  redis_data: # 添加 Redis 卷
+    driver: local
+  flowable_data: # 添加 Flowable 卷
+    driver: local
+networks:
+  elk_network:

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="Examples" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
+  <process id="UnbalancedForkJoin" name="UnbalancedForkJoin" isExecutable="true">
+    <startEvent id="theStart" flowable:formFieldValidation="true"></startEvent>
+    <sequenceFlow id="flow1" sourceRef="theStart" targetRef="fork"></sequenceFlow>
+    <parallelGateway id="fork" name="Fork"></parallelGateway>
+    <sequenceFlow id="sequenceFlow-a3d0aaa5-dc8f-4056-ab07-10e5fce48624" sourceRef="fork" targetRef="task1"></sequenceFlow>
+    <sequenceFlow id="sequenceFlow-fc9b5a89-8d84-441a-bc4b-90acac250e7a" sourceRef="fork" targetRef="task2"></sequenceFlow>
+    <sequenceFlow id="sequenceFlow-7b839451-fd0d-4464-aec7-0690ba492738" sourceRef="fork" targetRef="task3"></sequenceFlow>
+    <userTask id="task1" name="Task 1" flowable:formFieldValidation="true">
+      <extensionElements>
+        <flowable:taskListener event="create" delegateExpression="${testForkJoinTaskListener}"></flowable:taskListener>
+        <flowable:taskListener event="assignment" delegateExpression="${testForkJoinTaskListener}"></flowable:taskListener>
+        <flowable:taskListener event="complete" delegateExpression="${testForkJoinTaskListener}"></flowable:taskListener>
+        <flowable:taskListener event="delete" delegateExpression="${testForkJoinTaskListener}"></flowable:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="sequenceFlow-a173721f-3038-4c9d-8a70-cf5c17140435" sourceRef="task1" targetRef="firstJoin"></sequenceFlow>
+    <userTask id="task2" name="Task 2" flowable:formFieldValidation="true">
+      <extensionElements>
+        <flowable:taskListener event="create" delegateExpression="${testForkJoinTaskListener}"></flowable:taskListener>
+        <flowable:taskListener event="assignment" delegateExpression="${testForkJoinTaskListener}"></flowable:taskListener>
+        <flowable:taskListener event="complete" delegateExpression="${testForkJoinTaskListener}"></flowable:taskListener>
+        <flowable:taskListener event="delete" delegateExpression="${testForkJoinTaskListener}"></flowable:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="sequenceFlow-a73a5857-a823-44f3-b9ab-7aa5bd7bc30c" sourceRef="task2" targetRef="firstJoin"></sequenceFlow>
+    <userTask id="task3" name="Task 3" flowable:formFieldValidation="true">
+      <extensionElements>
+        <flowable:taskListener event="create" delegateExpression="${testForkJoinTaskListener}"></flowable:taskListener>
+        <flowable:taskListener event="assignment" delegateExpression="${testForkJoinTaskListener}"></flowable:taskListener>
+        <flowable:taskListener event="complete" delegateExpression="${testForkJoinTaskListener}"></flowable:taskListener>
+        <flowable:taskListener event="delete" delegateExpression="${testForkJoinTaskListener}"></flowable:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="sequenceFlow-cd72b7d1-eb6f-4f79-aedd-8872bff70876" sourceRef="task3" targetRef="secondJoin"></sequenceFlow>
+    <parallelGateway id="firstJoin" name="First Join"></parallelGateway>
+    <sequenceFlow id="sequenceFlow-982f97e5-cbe3-4a80-b0d4-d3b024465a88" sourceRef="firstJoin" targetRef="task4"></sequenceFlow>
+    <userTask id="task4" name="Task 4" flowable:formFieldValidation="true">
+      <extensionElements>
+        <flowable:taskListener event="create" delegateExpression="${testForkJoinTaskListener}"></flowable:taskListener>
+        <flowable:taskListener event="assignment" delegateExpression="${testForkJoinTaskListener}"></flowable:taskListener>
+        <flowable:taskListener event="complete" delegateExpression="${testForkJoinTaskListener}"></flowable:taskListener>
+        <flowable:taskListener event="delete" delegateExpression="${testForkJoinTaskListener}"></flowable:taskListener>
+      </extensionElements>
+    </userTask>
+    <parallelGateway id="secondJoin"></parallelGateway>
+    <sequenceFlow id="sequenceFlow-13022e00-2214-4995-bb89-b046033d2613" sourceRef="secondJoin" targetRef="theEnd"></sequenceFlow>
+    <endEvent id="theEnd"></endEvent>
+    <sequenceFlow id="sequenceFlow-ff35d8c5-a6e2-4a4e-9e30-8b8c4b6dbe9a" sourceRef="task4" targetRef="secondJoin"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_UnbalancedForkJoin">
+    <bpmndi:BPMNPlane bpmnElement="UnbalancedForkJoin" id="BPMNPlane_UnbalancedForkJoin">
+      <bpmndi:BPMNShape bpmnElement="theStart" id="BPMNShape_theStart">
+        <omgdc:Bounds height="30.0" width="30.0" x="0.0" y="175.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="fork" id="BPMNShape_fork">
+        <omgdc:Bounds height="40.0" width="40.0" x="80.0" y="170.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="task1" id="BPMNShape_task1">
+        <omgdc:Bounds height="60.0" width="100.0" x="170.0" y="160.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="task2" id="BPMNShape_task2">
+        <omgdc:Bounds height="60.0" width="100.0" x="170.0" y="0.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="task3" id="BPMNShape_task3">
+        <omgdc:Bounds height="60.0" width="100.0" x="170.0" y="320.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="firstJoin" id="BPMNShape_firstJoin">
+        <omgdc:Bounds height="39.999999999999986" width="40.0" x="320.00001430511526" y="100.00000447034849"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="task4" id="BPMNShape_task4">
+        <omgdc:Bounds height="60.0" width="100.0" x="405.00000905245565" y="90.00000402331364"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="secondJoin" id="BPMNShape_secondJoin">
+        <omgdc:Bounds height="40.0" width="40.0" x="560.0000125169756" y="170.0000037997962"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="theEnd" id="BPMNShape_theEnd">
+        <omgdc:Bounds height="28.0" width="28.0" x="650.0000145286325" y="176.00000773370292"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-a173721f-3038-4c9d-8a70-cf5c17140435" id="BPMNEdge_sequenceFlow-a173721f-3038-4c9d-8a70-cf5c17140435" flowable:sourceDockerX="50.0" flowable:sourceDockerY="30.0" flowable:targetDockerX="20.0" flowable:targetDockerY="19.999999999999993">
+        <omgdi:waypoint x="269.9499999999838" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="282.0" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="282.0" y="120.00000447034847"></omgdi:waypoint>
+        <omgdi:waypoint x="320.00001430511526" y="120.00000447034847"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-fc9b5a89-8d84-441a-bc4b-90acac250e7a" id="BPMNEdge_sequenceFlow-fc9b5a89-8d84-441a-bc4b-90acac250e7a" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="30.0">
+        <omgdi:waypoint x="119.91892523364481" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="132.0" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="132.0" y="30.000000000000007"></omgdi:waypoint>
+        <omgdi:waypoint x="169.99999999999042" y="30.000000000000007"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-a73a5857-a823-44f3-b9ab-7aa5bd7bc30c" id="BPMNEdge_sequenceFlow-a73a5857-a823-44f3-b9ab-7aa5bd7bc30c" flowable:sourceDockerX="50.0" flowable:sourceDockerY="30.0" flowable:targetDockerX="20.0" flowable:targetDockerY="19.999999999999993">
+        <omgdi:waypoint x="269.95000000000005" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="282.0" y="30.0"></omgdi:waypoint>
+        <omgdi:waypoint x="282.0" y="120.00000447034847"></omgdi:waypoint>
+        <omgdi:waypoint x="320.00001430511526" y="120.00000447034847"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1" flowable:sourceDockerX="15.0" flowable:sourceDockerY="15.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+        <omgdi:waypoint x="29.94999747176033" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="80.0" y="190.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-cd72b7d1-eb6f-4f79-aedd-8872bff70876" id="BPMNEdge_sequenceFlow-cd72b7d1-eb6f-4f79-aedd-8872bff70876" flowable:sourceDockerX="50.0" flowable:sourceDockerY="30.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+        <omgdi:waypoint x="269.95000000000005" y="350.0"></omgdi:waypoint>
+        <omgdi:waypoint x="580.0000125169756" y="350.0"></omgdi:waypoint>
+        <omgdi:waypoint x="580.0000125169756" y="209.9062108043215"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-ff35d8c5-a6e2-4a4e-9e30-8b8c4b6dbe9a" id="BPMNEdge_sequenceFlow-ff35d8c5-a6e2-4a4e-9e30-8b8c4b6dbe9a" flowable:sourceDockerX="50.0" flowable:sourceDockerY="30.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
+        <omgdi:waypoint x="504.95000905244956" y="120.00000402331364"></omgdi:waypoint>
+        <omgdi:waypoint x="580.0000125169756" y="120.00000402331364"></omgdi:waypoint>
+        <omgdi:waypoint x="580.0000125169756" y="170.0000037997962"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-7b839451-fd0d-4464-aec7-0690ba492738" id="BPMNEdge_sequenceFlow-7b839451-fd0d-4464-aec7-0690ba492738" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="30.0">
+        <omgdi:waypoint x="119.91892523364481" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="132.0" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="132.0" y="350.0"></omgdi:waypoint>
+        <omgdi:waypoint x="169.99999999997692" y="350.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-a3d0aaa5-dc8f-4056-ab07-10e5fce48624" id="BPMNEdge_sequenceFlow-a3d0aaa5-dc8f-4056-ab07-10e5fce48624" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="30.0">
+        <omgdi:waypoint x="119.94169442131553" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="169.99999999997792" y="190.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-13022e00-2214-4995-bb89-b046033d2613" id="BPMNEdge_sequenceFlow-13022e00-2214-4995-bb89-b046033d2613" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
+        <omgdi:waypoint x="599.9381507047174" y="190.00000473409895"></omgdi:waypoint>
+        <omgdi:waypoint x="650.0000141933564" y="190.0000070780518"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-982f97e5-cbe3-4a80-b0d4-d3b024465a88" id="BPMNEdge_sequenceFlow-982f97e5-cbe3-4a80-b0d4-d3b024465a88" flowable:sourceDockerX="20.0" flowable:sourceDockerY="19.999999999999993" flowable:targetDockerX="50.0" flowable:targetDockerY="30.0">
+        <omgdi:waypoint x="359.94134800510614" y="120.00000439260327"></omgdi:waypoint>
+        <omgdi:waypoint x="405.00000863414357" y="120.00000421748224"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
