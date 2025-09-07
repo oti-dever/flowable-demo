@@ -10,7 +10,7 @@ import cn.cutepikachu.flowable.flowable.event.impl.TaskApprovedEvent;
 import cn.cutepikachu.flowable.flowable.service.IFlowableService;
 import cn.cutepikachu.flowable.flowable.service.IProcessBusinessService;
 import cn.cutepikachu.flowable.flowable.service.IProcessService;
-import cn.cutepikachu.flowable.flowable.service.manager.ProcessServiceManager;
+import cn.cutepikachu.flowable.flowable.service.manager.ProcessBusinessServiceManager;
 import cn.cutepikachu.flowable.model.dto.*;
 import cn.cutepikachu.flowable.model.entity.FlowableProcessDefinition;
 import cn.cutepikachu.flowable.model.entity.Process;
@@ -39,7 +39,7 @@ import static cn.cutepikachu.flowable.constant.FlowableConstant.*;
 public class GeneralProcessService implements IProcessService {
 
     @Resource
-    private ProcessServiceManager processServiceManager;
+    private ProcessBusinessServiceManager processBusinessServiceManager;
 
     @Resource
     private ProcessDAO processDAO;
@@ -99,7 +99,7 @@ public class GeneralProcessService implements IProcessService {
         if (processDefinition == null) {
             throw new BusinessException(ProcessErrorEnum.PROCESS_DEFINITION_NOT_FOUND);
         }
-        IProcessBusinessService processBusinessService = processServiceManager
+        IProcessBusinessService processBusinessService = processBusinessServiceManager
                 .getProcessService(processDefinition.getProcessDefinitionKey());
         Object businessData = processBusinessService.getByBusinessData(process.getBusinessId());
 
@@ -147,7 +147,7 @@ public class GeneralProcessService implements IProcessService {
         processDAO.saveOrUpdate(process);
 
         // 获取流程业务服务
-        IProcessBusinessService processBusinessService = processServiceManager
+        IProcessBusinessService processBusinessService = processBusinessServiceManager
                 .getProcessService(processDefinition.getProcessDefinitionKey());
         // 执行发起前的业务处理
         ProcessStartedEvent businessEvent = processBusinessService.startProcessBusiness(process.getId(), data);
@@ -197,7 +197,7 @@ public class GeneralProcessService implements IProcessService {
 
         // 获取流程业务服务
         FlowableProcessDefinition processDefinition = flowableService.getProcessDefinition(process.getProcessDefinitionId());
-        IProcessBusinessService processBusinessService = processServiceManager
+        IProcessBusinessService processBusinessService = processBusinessServiceManager
                 .getProcessService(processDefinition.getProcessDefinitionKey());
         // 执行业务撤销操作
         return processBusinessService.cancelProcessBusiness(process.getBusinessId(), comment);
@@ -219,7 +219,7 @@ public class GeneralProcessService implements IProcessService {
 
         // 获取流程业务服务
         FlowableProcessDefinition processDefinition = flowableService.getProcessDefinition(process.getProcessDefinitionId());
-        IProcessBusinessService processBusinessService = processServiceManager
+        IProcessBusinessService processBusinessService = processBusinessServiceManager
                 .getProcessService(processDefinition.getProcessDefinitionKey());
         // 执行业务废弃操作
         return processBusinessService.discardProcessBusiness(process.getBusinessId(), comment);
@@ -248,7 +248,7 @@ public class GeneralProcessService implements IProcessService {
 
         // 获取流程业务服务
         FlowableProcessDefinition processDefinition = flowableService.getProcessDefinition(process.getProcessDefinitionId());
-        IProcessBusinessService processBusinessService = processServiceManager
+        IProcessBusinessService processBusinessService = processBusinessServiceManager
                 .getProcessService(processDefinition.getProcessDefinitionKey());
         // 执行审批前的业务处理
         TaskApprovedEvent businessEvent = processBusinessService.approveTaskBusiness(process.getBusinessId(), dto);

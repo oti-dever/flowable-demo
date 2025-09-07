@@ -13,12 +13,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author <a href="https://github.com/cutepikachu-cn">笨蛋皮卡丘</a>
- * @description
+ * @description 流程业务服务管理器
  * @since 2025/9/6 09:18:44
  */
 @Slf4j
 @Component
-public class ProcessServiceManager {
+public class ProcessBusinessServiceManager {
 
     /**
      * 按流程定义Key映射的流程服务
