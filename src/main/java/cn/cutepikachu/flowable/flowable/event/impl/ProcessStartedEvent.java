@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -15,7 +14,7 @@ import java.util.Map;
  */
 @Getter
 @AllArgsConstructor
-public class ProcessStartedEvent implements ProcessEvent, Serializable {
+public class ProcessStartedEvent implements ProcessEvent {
 
     @Serial
     private static final long serialVersionUID = 1L;

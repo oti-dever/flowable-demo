@@ -1,17 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.flowable.org/processdef" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="expense_reimbursement_process" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
   <process id="expense_reimbursement_process" name="费用报销流程" isExecutable="true">
     <documentation>费用报销流程</documentation>
     <startEvent id="startEvent" name="开始" flowable:formFieldValidation="true"></startEvent>
-    <userTask id="reSubmitTask" name="重新填写报销单" flowable:formFieldValidation="true">
-      <documentation>发起人填写报销单据，包括金额、事由、发票等。</documentation>
-      <extensionElements>
-        <flowable:taskListener event="create" delegateExpression="${expenseReimbursementTaskListener}"></flowable:taskListener>
-        <flowable:taskListener event="assignment" delegateExpression="${expenseReimbursementTaskListener}"></flowable:taskListener>
-        <flowable:taskListener event="complete" delegateExpression="${expenseReimbursementTaskListener}"></flowable:taskListener>
-        <flowable:taskListener event="delete" delegateExpression="${expenseReimbursementTaskListener}"></flowable:taskListener>
-      </extensionElements>
-    </userTask>
     <userTask id="deptLeaderApprovalTask" name="部门主管审批" flowable:formFieldValidation="true">
       <documentation>申请人的部门主管进行审批</documentation>
       <extensionElements>
@@ -21,7 +12,6 @@
         <flowable:taskListener event="delete" delegateExpression="${expenseReimbursementTaskListener}"></flowable:taskListener>
       </extensionElements>
     </userTask>
-    <exclusiveGateway id="deptLeaderCheck" name="主管审批结果?"></exclusiveGateway>
     <exclusiveGateway id="amountCheck" name="报销金额 &gt; 1000元?"></exclusiveGateway>
     <userTask id="bossApprovalTask" name="老板审批" flowable:formFieldValidation="true">
       <documentation>老板对大额报销进行审批</documentation>
@@ -32,8 +22,6 @@
         <flowable:taskListener event="delete" delegateExpression="${expenseReimbursementTaskListener}"></flowable:taskListener>
       </extensionElements>
     </userTask>
-    <sequenceFlow id="flow6" sourceRef="bossApprovalTask" targetRef="bossDecision"></sequenceFlow>
-    <exclusiveGateway id="bossDecision" name="老板审批结果?"></exclusiveGateway>
     <userTask id="financeApprovalTask" name="财务审批" flowable:formFieldValidation="true">
       <documentation>财务人员审批</documentation>
       <extensionElements>
@@ -44,24 +32,6 @@
       </extensionElements>
     </userTask>
     <endEvent id="endEvent" name="结束"></endEvent>
-    <exclusiveGateway id="financeCheck"></exclusiveGateway>
-    <sequenceFlow id="flow3" sourceRef="deptLeaderApprovalTask" targetRef="deptLeaderCheck"></sequenceFlow>
-    <sequenceFlow id="flow_amount_high" name="是" sourceRef="amountCheck" targetRef="bossApprovalTask">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${amount > 1000}]]></conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="flow9" sourceRef="financeApprovalTask" targetRef="financeCheck"></sequenceFlow>
-    <sequenceFlow id="flow_dept_approved" name="同意" sourceRef="deptLeaderCheck" targetRef="amountCheck">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${deptLeaderApproved == true}]]></conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="flow_amount_low" name="否" sourceRef="amountCheck" targetRef="financeApprovalTask">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${amount <= 1000}]]></conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="flow_boss_approved" name="同意" sourceRef="bossDecision" targetRef="financeApprovalTask">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${bossApproved == true}]]></conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="flow_finance_approved" name="同意" sourceRef="financeCheck" targetRef="endEvent">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${financeApproved == true}]]></conditionExpression>
-    </sequenceFlow>
     <subProcess id="expireHandler" name="超时处理" triggeredByEvent="true">
       <startEvent id="sid-428A07C9-1C19-46E8-BBAA-ABAC10240291" isInterrupting="true">
         <timerEventDefinition>
@@ -71,49 +41,36 @@
       <serviceTask id="sid-322E78A3-2E2C-4B39-9920-552FEBE7ABAE" name="超时" flowable:delegateExpression="${expenseReimbursementExpireDelegate}"></serviceTask>
       <sequenceFlow id="sid-6DFAF5AF-6E53-47C5-B8C5-C8A570E46735" sourceRef="sid-428A07C9-1C19-46E8-BBAA-ABAC10240291" targetRef="sid-322E78A3-2E2C-4B39-9920-552FEBE7ABAE"></sequenceFlow>
     </subProcess>
-    <sequenceFlow id="flow_dept_rejected" name="驳回" sourceRef="deptLeaderCheck" targetRef="reSubmitTask">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${deptLeaderApproved == false}]]></conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="flow_boss_rejected" name="驳回" sourceRef="bossDecision" targetRef="reSubmitTask">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${bossApproved == false}]]></conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="flow_finance_rejected" name="驳回" sourceRef="financeCheck" targetRef="reSubmitTask">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${financeApproved == false}]]></conditionExpression>
-    </sequenceFlow>
     <sequenceFlow id="sid-95CAEDFD-CD4E-4374-80CC-4150C8DFD73F" sourceRef="startEvent" targetRef="deptLeaderApprovalTask"></sequenceFlow>
-    <sequenceFlow id="sid-F4A9FF64-9FF5-438A-839A-B0A16BBB3BEA" sourceRef="reSubmitTask" targetRef="deptLeaderApprovalTask"></sequenceFlow>
+    <sequenceFlow id="flow3" sourceRef="deptLeaderApprovalTask" targetRef="amountCheck"></sequenceFlow>
+    <sequenceFlow id="flow_amount_high" name="是" sourceRef="amountCheck" targetRef="bossApprovalTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${amount > 1000}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow6" sourceRef="bossApprovalTask" targetRef="financeApprovalTask"></sequenceFlow>
+    <sequenceFlow id="flow_amount_low" name="否" sourceRef="amountCheck" targetRef="financeApprovalTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${amount <= 1000}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow9" sourceRef="financeApprovalTask" targetRef="endEvent"></sequenceFlow>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_expense_reimbursement_process">
     <bpmndi:BPMNPlane bpmnElement="expense_reimbursement_process" id="BPMNPlane_expense_reimbursement_process">
       <bpmndi:BPMNShape bpmnElement="startEvent" id="BPMNShape_startEvent">
         <omgdc:Bounds height="30.0" width="30.000000000000007" x="41.00001231581023" y="248.00000234693294"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="reSubmitTask" id="BPMNShape_reSubmitTask">
-        <omgdc:Bounds height="60.00000000000001" width="100.00000000000003" x="195.00000435858973" y="45.0000010058284"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="deptLeaderApprovalTask" id="BPMNShape_deptLeaderApprovalTask">
         <omgdc:Bounds height="60.0" width="100.00000000000003" x="195.00000435858973" y="233.00000755488895"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="deptLeaderCheck" id="BPMNShape_deptLeaderCheck">
-        <omgdc:Bounds height="40.0" width="40.0" x="421.0000208094723" y="243.00000543147337"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="amountCheck" id="BPMNShape_amountCheck">
         <omgdc:Bounds height="40.0" width="40.0" x="551.0000237151987" y="243.00001137703703"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="bossApprovalTask" id="BPMNShape_bossApprovalTask">
-        <omgdc:Bounds height="60.00000000000003" width="100.0" x="630.0000281631957" y="155.00000581145306"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="bossDecision" id="BPMNShape_bossDecision">
-        <omgdc:Bounds height="40.0" width="40.0" x="751.0000123158102" y="165.00000234693294"></omgdc:Bounds>
+        <omgdc:Bounds height="60.00000000000003" width="100.0" x="675.000015087426" y="155.00000927597327"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="financeApprovalTask" id="BPMNShape_financeApprovalTask">
         <omgdc:Bounds height="60.0" width="100.0" x="841.0000301972041" y="233.00000520795595"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endEvent" id="BPMNShape_endEvent">
         <omgdc:Bounds height="27.99999999999997" width="28.0" x="1095.0000244751577" y="249.0000169426211"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="financeCheck" id="BPMNShape_financeCheck">
-        <omgdc:Bounds height="40.0" width="40.0" x="990.0000221282248" y="243.00000777840637"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="expireHandler" id="BPMNShape_expireHandler">
         <omgdc:Bounds height="154.9999998882413" width="342.0000031292439" x="375.00001676380697" y="330.00000737607496"></omgdc:Bounds>
@@ -124,66 +81,35 @@
       <bpmndi:BPMNShape bpmnElement="sid-322E78A3-2E2C-4B39-9920-552FEBE7ABAE" id="BPMNShape_sid-322E78A3-2E2C-4B39-9920-552FEBE7ABAE">
         <omgdc:Bounds height="80.0" width="99.99999999999994" x="505.0000223908579" y="370.0000694021633"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge bpmnElement="flow_boss_rejected" id="BPMNEdge_flow_boss_rejected" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="67.37998561560981" flowable:targetDockerY="30.999997876584484">
-        <omgdi:waypoint x="771.0000123158102" y="165.00000234693294"></omgdi:waypoint>
-        <omgdi:waypoint x="771.0000123158102" y="75.99999888241288"></omgdi:waypoint>
-        <omgdi:waypoint x="294.9500043585898" y="75.99999888241288"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow_amount_high" id="BPMNEdge_flow_amount_high" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="30.000000000000014">
         <omgdi:waypoint x="571.0000237151987" y="243.00001137703703"></omgdi:waypoint>
-        <omgdi:waypoint x="571.0000237151987" y="185.0000058114531"></omgdi:waypoint>
-        <omgdi:waypoint x="630.0000281631931" y="185.0000058114531"></omgdi:waypoint>
+        <omgdi:waypoint x="571.0000237151987" y="185.0000092759733"></omgdi:waypoint>
+        <omgdi:waypoint x="675.0000150874173" y="185.0000092759733"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow_finance_approved" id="BPMNEdge_flow_finance_approved" flowable:sourceDockerX="20.5" flowable:sourceDockerY="20.5" flowable:targetDockerX="14.0" flowable:targetDockerY="13.999999999999986">
-        <omgdi:waypoint x="1029.5369469532761" y="263.4030707910179"></omgdi:waypoint>
-        <omgdi:waypoint x="1095.0001984225978" y="263.0708271298328"></omgdi:waypoint>
+      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3" flowable:sourceDockerX="50.000000000000014" flowable:sourceDockerY="30.0" flowable:targetDockerX="20.5" flowable:targetDockerY="20.5">
+        <omgdi:waypoint x="294.9500043585898" y="263.07650124381894"></omgdi:waypoint>
+        <omgdi:waypoint x="551.4693486355194" y="263.4693362973853"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6" flowable:sourceDockerX="50.0" flowable:sourceDockerY="30.000000000000014" flowable:targetDockerX="56.37997801601807" flowable:targetDockerY="16.999996222555524">
+        <omgdi:waypoint x="774.950015087426" y="185.0000092759733"></omgdi:waypoint>
+        <omgdi:waypoint x="897.3800082132221" y="185.0000092759733"></omgdi:waypoint>
+        <omgdi:waypoint x="897.3800082132221" y="233.00000520795595"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow_amount_low" id="BPMNEdge_flow_amount_low" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="30.0">
         <omgdi:waypoint x="590.946907886002" y="263.0000109914695"></omgdi:waypoint>
         <omgdi:waypoint x="841.0000301972041" y="263.00000617091086"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow_dept_rejected" id="BPMNEdge_flow_dept_rejected" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.000000000000014" flowable:targetDockerY="30.00000000000001">
-        <omgdi:waypoint x="441.0000208094723" y="243.00000543147337"></omgdi:waypoint>
-        <omgdi:waypoint x="441.0000208094723" y="75.00000100582841"></omgdi:waypoint>
-        <omgdi:waypoint x="294.9500043585898" y="75.00000100582841"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-6DFAF5AF-6E53-47C5-B8C5-C8A570E46735" id="BPMNEdge_sid-6DFAF5AF-6E53-47C5-B8C5-C8A570E46735" flowable:sourceDockerX="16.0" flowable:sourceDockerY="16.0" flowable:targetDockerX="49.99999999999997" flowable:targetDockerY="40.0">
         <omgdi:waypoint x="445.94989450783027" y="410.43607038253265"></omgdi:waypoint>
         <omgdi:waypoint x="505.0000223908579" y="410.19986961629326"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow9" id="BPMNEdge_flow9" flowable:sourceDockerX="50.0" flowable:sourceDockerY="30.0" flowable:targetDockerX="14.0" flowable:targetDockerY="13.999999999999972">
+        <omgdi:waypoint x="940.9500295478191" y="263.0000078967015"></omgdi:waypoint>
+        <omgdi:waypoint x="1095.0000244751577" y="263.0000161890187"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sid-95CAEDFD-CD4E-4374-80CC-4150C8DFD73F" id="BPMNEdge_sid-95CAEDFD-CD4E-4374-80CC-4150C8DFD73F" flowable:sourceDockerX="15.000000000000004" flowable:sourceDockerY="15.0" flowable:targetDockerX="50.000000000000014" flowable:targetDockerY="30.0">
         <omgdi:waypoint x="70.95001180399912" y="263.00000275888505"></omgdi:waypoint>
         <omgdi:waypoint x="195.00000435858973" y="263.00000617712277"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow_boss_approved" id="BPMNEdge_flow_boss_approved" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="50.0" flowable:targetDockerY="30.0">
-        <omgdi:waypoint x="790.9417067383472" y="185.00000234693294"></omgdi:waypoint>
-        <omgdi:waypoint x="891.0000301972041" y="185.00000234693294"></omgdi:waypoint>
-        <omgdi:waypoint x="891.0000301972041" y="233.00000520795595"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3" flowable:sourceDockerX="50.000000000000014" flowable:sourceDockerY="30.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
-        <omgdi:waypoint x="294.9500043585898" y="263.00000701320135"></omgdi:waypoint>
-        <omgdi:waypoint x="421.0000210261473" y="263.0000056476067"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow_finance_rejected" id="BPMNEdge_flow_finance_rejected" flowable:sourceDockerX="20.5" flowable:sourceDockerY="20.5" flowable:targetDockerX="50.000000000000014" flowable:targetDockerY="30.00000000000001">
-        <omgdi:waypoint x="1010.5000221282248" y="243.50000777840637"></omgdi:waypoint>
-        <omgdi:waypoint x="1010.5000221282248" y="75.00000100582841"></omgdi:waypoint>
-        <omgdi:waypoint x="294.9500043585898" y="75.00000100582841"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6" flowable:sourceDockerX="50.0" flowable:sourceDockerY="30.000000000000014" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
-        <omgdi:waypoint x="729.9500279823963" y="185.00000390787025"></omgdi:waypoint>
-        <omgdi:waypoint x="751.0000130772432" y="185.00000310646246"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow_dept_approved" id="BPMNEdge_flow_dept_approved" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
-        <omgdi:waypoint x="460.94235271917574" y="263.00000634388863"></omgdi:waypoint>
-        <omgdi:waypoint x="551.0000237151987" y="263.00001046233507"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow9" id="BPMNEdge_flow9" flowable:sourceDockerX="50.0" flowable:sourceDockerY="30.0" flowable:targetDockerX="20.5" flowable:targetDockerY="20.5">
-        <omgdi:waypoint x="940.9500301972026" y="263.2090021123944"></omgdi:waypoint>
-        <omgdi:waypoint x="990.4159880752577" y="263.4159737254393"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="sid-F4A9FF64-9FF5-438A-839A-B0A16BBB3BEA" id="BPMNEdge_sid-F4A9FF64-9FF5-438A-839A-B0A16BBB3BEA" flowable:sourceDockerX="50.000000000000014" flowable:sourceDockerY="29.999999999999996" flowable:targetDockerX="50.000000000000014" flowable:targetDockerY="30.0">
-        <omgdi:waypoint x="245.00000435858976" y="104.9500010058284"></omgdi:waypoint>
-        <omgdi:waypoint x="245.00000435858976" y="233.00000755488895"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

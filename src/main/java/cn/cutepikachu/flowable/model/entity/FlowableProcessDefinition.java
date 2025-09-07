@@ -31,6 +31,12 @@ public class FlowableProcessDefinition implements Serializable {
     private String processDefinitionKey;
 
     /**
+     * 流程定义ID
+     */
+    @TableField(value = "process_definition_id")
+    private String processDefinitionId;
+
+    /**
      * 流程定义名称
      */
     @TableField(value = "process_name")

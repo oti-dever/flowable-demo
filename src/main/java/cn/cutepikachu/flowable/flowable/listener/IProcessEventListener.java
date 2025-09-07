@@ -1,5 +1,6 @@
 package cn.cutepikachu.flowable.flowable.listener;
 
+import cn.cutepikachu.flowable.flowable.service.IFlowableService;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEvent;
 
 /**
@@ -8,6 +9,8 @@ import org.flowable.common.engine.api.delegate.event.FlowableEngineEvent;
  * @since 2025/9/3 17:17:15
  */
 public interface IProcessEventListener {
+
+    IFlowableService getFlowableService();
 
     /**
      * 获取监听的流程定义Key
@@ -29,16 +32,5 @@ public interface IProcessEventListener {
      * @param event 流程删除事件
      */
     void onProcessDeleteBusiness(FlowableEngineEvent event);
-
-    /**
-     * 判断是否应该处理该流程事件
-     * 默认实现：检查流程定义Key是否匹配
-     * 
-     * @param processDefinitionKey 流程定义Key
-     * @return 是否应该处理
-     */
-    default boolean shouldHandle(String processDefinitionKey) {
-        return getProcessDefinitionKey().equals(processDefinitionKey);
-    }
 
 }

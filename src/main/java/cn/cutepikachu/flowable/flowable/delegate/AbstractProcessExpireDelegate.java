@@ -2,7 +2,7 @@ package cn.cutepikachu.flowable.flowable.delegate;
 
 import cn.cutepikachu.flowable.dao.ProcessDAO;
 import cn.cutepikachu.flowable.enums.ProcessStatusEnum;
-import cn.cutepikachu.flowable.flowable.IFlowableService;
+import cn.cutepikachu.flowable.flowable.service.IFlowableService;
 import cn.cutepikachu.flowable.model.entity.Process;
 import jakarta.annotation.Resource;
 import org.flowable.engine.delegate.DelegateExecution;
@@ -25,7 +25,7 @@ public abstract class AbstractProcessExpireDelegate implements IDelegate {
     private IFlowableService flowableService;
 
     @Override
-    public final void onExecute(DelegateExecution execution) {
+    public void onExecute(DelegateExecution execution) {
         String processInstanceId = execution.getProcessInstanceId();
         flowableService.deleteProcessInstance(processInstanceId, ProcessStatusEnum.EXPIRED.getDesc());
         Long processId = execution.getVariable(PROCESS_ID, Long.class);
@@ -36,7 +36,7 @@ public abstract class AbstractProcessExpireDelegate implements IDelegate {
         this.executeBusiness(execution, process.getBusinessId());
     }
 
-    protected void executeBusiness(DelegateExecution execution, Long businessId) {
+    public void executeBusiness(DelegateExecution execution, Long businessId) {
     }
 
 }

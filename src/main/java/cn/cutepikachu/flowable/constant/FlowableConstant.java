@@ -64,7 +64,7 @@ public interface FlowableConstant {
          * Value: 策略
          */
         Map<String, ApproverSelectStrategyEnum> ASSIGNEE_STRATEGY_MAP = Map.of(
-                APPROVAL_TASK, ApproverSelectStrategyEnum.DEPT_LEADER
+                APPROVAL_TASK, ApproverSelectStrategyEnum.LEAVE_DAYS_BASED
         );
     }
 
@@ -78,37 +78,25 @@ public interface FlowableConstant {
          */
         String APPROVAL_COMMENT = "approvalComment";
         /**
-         * 重新报销单任务
-         */
-        String RE_SUBMIT_TASK = "reSubmitTask";
-        /**
          * 部门主管审批任务
          */
         String DEPT_LEADER_TASK = "deptLeaderApprovalTask";
-        /**
-         * 部门主管审批结果
-         */
-        String APPROVED_DEPT_LEADER = "deptLeaderApproved";
         /**
          * 老板审批任务
          */
         String BOSS_TASK = "bossApprovalTask";
         /**
-         * 老板审批结果
-         */
-        String APPROVED_BOSS = "bossApproved";
-        /**
          * 财务审批任务
          */
         String FINANCE_TASK = "financeApprovalTask";
         /**
-         * 财务审批结果
-         */
-        String APPROVED_FINANCE = "financeApproved";
-        /**
          * 报销金额
          */
         String AMOUNT = "amount";
+        /**
+         * 审批是否通过
+         */
+        String APPROVED = "approved";
         /**
          * 审批人选择策略映射
          * <p>
@@ -116,7 +104,6 @@ public interface FlowableConstant {
          * Value: 策略
          */
         Map<String, ApproverSelectStrategyEnum> ASSIGNEE_STRATEGY_MAP = Map.of(
-                RE_SUBMIT_TASK, ApproverSelectStrategyEnum.NONE,
                 DEPT_LEADER_TASK, ApproverSelectStrategyEnum.DEPT_LEADER,
                 BOSS_TASK, ApproverSelectStrategyEnum.BOSS,
                 FINANCE_TASK, ApproverSelectStrategyEnum.FINANCE
@@ -144,6 +131,10 @@ public interface FlowableConstant {
          * 任务 4
          */
         String TASK_4 = "task4";
+        /**
+         * 审批是否通过
+         */
+        String APPROVED = "approved";
         /**
          * 审批人选择策略映射
          * <p>

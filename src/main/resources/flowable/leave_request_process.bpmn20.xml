@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.flowable.org/processdef" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="leave_request_process" exporter="Flowable Open Source Modeler" exporterVersion="6.8.0">
   <process id="leave_request_process" name="请假流程" isExecutable="true">
     <documentation>请假流程：单一审批节点（按规则选人），审批后流向通过/驳回结束。</documentation>
     <startEvent id="start" name="开始" flowable:formFieldValidation="true"></startEvent>
-    <sequenceFlow id="flow_start_to_task" sourceRef="start" targetRef="approveTask"></sequenceFlow>
     <userTask id="approveTask" name="请假审批" flowable:formFieldValidation="true">
       <extensionElements>
         <flowable:taskListener event="create" delegateExpression="${leaveApprovalTaskListener}"></flowable:taskListener>
@@ -12,16 +11,7 @@
         <flowable:taskListener event="delete" delegateExpression="${leaveApprovalTaskListener}"></flowable:taskListener>
       </extensionElements>
     </userTask>
-    <exclusiveGateway id="g_approved" name="是否通过"></exclusiveGateway>
     <endEvent id="end_pass" name="通过"></endEvent>
-    <endEvent id="end_reject" name="驳回"></endEvent>
-    <sequenceFlow id="flow_reject" sourceRef="g_approved" targetRef="end_reject">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${approved == false}]]></conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="flow_task_to_gateway" sourceRef="approveTask" targetRef="g_approved"></sequenceFlow>
-    <sequenceFlow id="flow_pass" sourceRef="g_approved" targetRef="end_pass">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${approved}]]></conditionExpression>
-    </sequenceFlow>
     <subProcess id="expireHandler" name="超时处理" triggeredByEvent="true">
       <startEvent id="sid-4D313270-8057-4260-AA41-09611837E5D7" isInterrupting="true">
         <timerEventDefinition>
@@ -31,6 +21,8 @@
       <serviceTask id="sid-66F0218C-592A-4AB3-83D1-40D2174D0016" name="超时" flowable:delegateExpression="${leaveRequestExpireDelegate}"></serviceTask>
       <sequenceFlow id="sid-F97F988F-E3CB-4D83-A0A3-412A08CFC53A" sourceRef="sid-4D313270-8057-4260-AA41-09611837E5D7" targetRef="sid-66F0218C-592A-4AB3-83D1-40D2174D0016"></sequenceFlow>
     </subProcess>
+    <sequenceFlow id="flow_start_to_task" sourceRef="start" targetRef="approveTask"></sequenceFlow>
+    <sequenceFlow id="flow_to_end" sourceRef="approveTask" targetRef="end_pass"></sequenceFlow>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_leave_request_process">
     <bpmndi:BPMNPlane bpmnElement="leave_request_process" id="BPMNPlane_leave_request_process">
@@ -40,14 +32,8 @@
       <bpmndi:BPMNShape bpmnElement="approveTask" id="BPMNShape_approveTask">
         <omgdc:Bounds height="80.0" width="100.00000000000003" x="195.00000435858973" y="120.00000268220907"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="g_approved" id="BPMNShape_g_approved">
-        <omgdc:Bounds height="40.0" width="40.0" x="390.00000871717947" y="140.00000581145306"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="end_pass" id="BPMNShape_end_pass">
-        <omgdc:Bounds height="28.0" width="28.0" x="510.00001139938854" y="90.0000020116568"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="end_reject" id="BPMNShape_end_reject">
-        <omgdc:Bounds height="28.0" width="28.0" x="525.0000117346647" y="210.0000046938659"></omgdc:Bounds>
+        <omgdc:Bounds height="28.0" width="27.999999999999943" x="405.00000905245565" y="146.00001244992086"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="expireHandler" id="BPMNShape_expireHandler">
         <omgdc:Bounds height="160.0" width="315.0000025704503" x="184.88001125037698" y="263.0000076666476"></omgdc:Bounds>
@@ -66,17 +52,9 @@
         <omgdi:waypoint x="261.4498727997011" y="343.43306987916856"></omgdi:waypoint>
         <omgdi:waypoint x="315.0000070407877" y="343.20901048830547"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow_pass" id="BPMNEdge_flow_pass" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
-        <omgdi:waypoint x="423.37824381595755" y="153.4117703215063"></omgdi:waypoint>
-        <omgdi:waypoint x="511.4314343680695" y="110.15198998922341"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow_task_to_gateway" id="BPMNEdge_flow_task_to_gateway" flowable:sourceDockerX="50.000000000000014" flowable:sourceDockerY="40.0" flowable:targetDockerX="20.0" flowable:targetDockerY="20.0">
-        <omgdi:waypoint x="294.95000435856474" y="160.00000362951656"></omgdi:waypoint>
-        <omgdi:waypoint x="390.00000871717947" y="160.0000054321508"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow_reject" id="BPMNEdge_flow_reject" flowable:sourceDockerX="20.0" flowable:sourceDockerY="20.0" flowable:targetDockerX="14.0" flowable:targetDockerY="14.0">
-        <omgdi:waypoint x="423.3327251069673" y="166.6155496722576"></omgdi:waypoint>
-        <omgdi:waypoint x="526.4468221888411" y="217.7765572216581"></omgdi:waypoint>
+      <bpmndi:BPMNEdge bpmnElement="flow_to_end" id="BPMNEdge_flow_to_end" flowable:sourceDockerX="50.000000000000014" flowable:sourceDockerY="40.0" flowable:targetDockerX="13.999999999999943" flowable:targetDockerY="14.0">
+        <omgdi:waypoint x="294.95000431024044" y="160.0000054862159"></omgdi:waypoint>
+        <omgdi:waypoint x="405.00000905245565" y="160.00001166401304"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

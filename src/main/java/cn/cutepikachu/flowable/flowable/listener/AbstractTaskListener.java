@@ -65,26 +65,26 @@ public abstract class AbstractTaskListener implements ITaskListener {
         Long starter = delegateTask.getVariable(STARTER, Long.class);
         List<Long> approvers = selectStrategy.selectApprovers(delegateTask, starter);
 
-        IProcessService defaultProcessService = getDefaultProcessService();
+        IProcessService processService = getProcessService();
         // 设置任务审批人
         delegateTask.setAssignee(ListOfTypeUtil.toString(approvers));
         Long processId = delegateTask.getVariable(PROCESS_ID, Long.class);
-        Map<String, List<Long>> assignee = defaultProcessService.getCurrentAssignee(processId);
+        Map<String, List<Long>> assignee = processService.getCurrentAssignee(processId);
         if (assignee == null) {
             assignee = TaskAssigneeMapUtil.createTaskAssigneeMap();
         }
         TaskAssigneeMapUtil.setTaskAssignee(assignee, taskKey, approvers);
-        defaultProcessService.setCurrentAssignee(processId, assignee);
+        processService.setCurrentAssignee(processId, assignee);
     }
 
     protected final void removeAssignee(DelegateTask delegateTask) {
-        IProcessService defaultProcessService = getDefaultProcessService();
+        IProcessService processService = getProcessService();
         // 移除任务审批人
         Long processId = delegateTask.getVariable(PROCESS_ID, Long.class);
-        Map<String, List<Long>> assignee = defaultProcessService.getCurrentAssignee(processId);
+        Map<String, List<Long>> assignee = processService.getCurrentAssignee(processId);
         String taskKey = delegateTask.getTaskDefinitionKey();
         TaskAssigneeMapUtil.removeTask(assignee, taskKey);
-        defaultProcessService.setCurrentAssignee(processId, assignee);
+        processService.setCurrentAssignee(processId, assignee);
     }
 
     @Override

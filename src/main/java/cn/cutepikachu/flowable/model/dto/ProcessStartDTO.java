@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 /**
  * @author <a href="https://github.com/cutepikachu-cn">笨蛋皮卡丘</a>
- * @description
+ * @description 流程发起 DTO
  * @since 2025/9/1 15:39:15
  */
 @Data

@@ -11,11 +11,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ExpenseReimbursementStatus {
-    RE_SUBMIT("RE_SUBMIT", "重新填写报销单"),
-    PENDING_DEPT_APPROVAL("PENDING_DEPT_APPROVAL", "待部门主管审批"),
-    PENDING_BOSS_APPROVAL("PENDING_BOSS_APPROVAL", "待老板审批"),
-    PENDING_FINANCE_APPROVAL("PENDING_FINANCE_APPROVAL", "待财务审批"),
-    COMPLETED("COMPLETED", "已完成"),
+    IN_PROCESS("IN_PROCESS", "流程中"),
+    PASSED("PASSED", "已通过"),
+    REJECTED("REJECTED", "未通过"),
     CANCELED("CANCELED", "已撤销"),
     DISCARDED("DISCARDED", "已废弃"),
     EXPIRED("EXPIRED", "已过期");

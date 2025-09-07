@@ -2,7 +2,7 @@ package cn.cutepikachu.flowable.flowable.listener.process;
 
 import cn.cutepikachu.flowable.dao.ProcessDAO;
 import cn.cutepikachu.flowable.enums.ProcessStatusEnum;
-import cn.cutepikachu.flowable.flowable.IFlowableService;
+import cn.cutepikachu.flowable.flowable.service.IFlowableService;
 import cn.cutepikachu.flowable.flowable.listener.manager.ProcessEventListenerManager;
 import jakarta.annotation.Resource;
 import org.flowable.common.engine.api.delegate.event.*;
@@ -59,7 +59,7 @@ public class GlobalProcessEventListener implements FlowableEventListener {
         // 流程完成时的处理逻辑
         String executionId = event.getExecutionId();
         Long processId = flowableService.getVariable(executionId, PROCESS_ID, Long.class);
-        processDAO.updateStatusById(processId, ProcessStatusEnum.COMPLETED.getCode());
+        processDAO.updateStatusById(processId, ProcessStatusEnum.PASSED.getCode());
         processDAO.clearCurAssignees(processId);
     }
 

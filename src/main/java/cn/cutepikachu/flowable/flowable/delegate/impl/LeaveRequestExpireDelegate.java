@@ -19,7 +19,7 @@ public class LeaveRequestExpireDelegate extends AbstractProcessExpireDelegate {
     private LeaveRequestDAO leaveRequestDAO;
 
     @Override
-    protected void executeBusiness(DelegateExecution execution, Long businessId) {
+    public void executeBusiness(DelegateExecution execution, Long businessId) {
         // 更新请假申请状态为已过期
         leaveRequestDAO.updateStatusById(businessId, LeaveRequestStatus.EXPIRED.getCode());
     }

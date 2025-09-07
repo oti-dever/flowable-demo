@@ -13,7 +13,8 @@ import lombok.Getter;
 public enum ProcessStatusEnum {
     DRAFT("DRAFT", "草稿"),
     IN_PROGRESS("IN_PROGRESS", "流程中"),
-    COMPLETED("COMPLETED", "已完成"),
+    PASSED("PASSED", "已通过"),
+    REJECTED("REJECTED", "未通过"),
     CANCELED("CANCELED", "已撤销"),
     DISCARDED("DISCARDED", "已废弃"),
     EXPIRED("EXPIRED", "已过期"),

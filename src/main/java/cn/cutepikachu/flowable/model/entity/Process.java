@@ -63,10 +63,10 @@ public class Process implements Serializable {
     private String processStatus;
 
     /**
-     * 业务数据
+     * 业务数据草稿
      */
-    @TableField(value = "data")
-    private String data;
+    @TableField(value = "draft_data")
+    private String draftData;
 
     /**
      * 发起人工号

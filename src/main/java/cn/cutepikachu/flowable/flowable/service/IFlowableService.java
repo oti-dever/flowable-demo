@@ -1,4 +1,4 @@
-package cn.cutepikachu.flowable.flowable;
+package cn.cutepikachu.flowable.flowable.service;
 
 import cn.cutepikachu.flowable.model.entity.FlowableProcessDefinition;
 import org.flowable.engine.runtime.ProcessInstance;

@@ -26,7 +26,7 @@ public class TestForkJoinTaskListener extends AbstractTaskListener {
 
     @Getter
     @Resource
-    private IProcessService defaultProcessService;
+    private IProcessService processService;
 
     @Resource
     private TestForkJoinDAO testForkJoinDAO;

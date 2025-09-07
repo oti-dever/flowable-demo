@@ -19,7 +19,7 @@ public class ExpenseReimbursementExpireDelegate extends AbstractProcessExpireDel
     private ExpenseReimbursementDAO expenseReimbursementDAO;
 
     @Override
-    protected void executeBusiness(DelegateExecution execution, Long businessId) {
+    public void executeBusiness(DelegateExecution execution, Long businessId) {
         // 更新报销申请状态为已过期
         expenseReimbursementDAO.updateStatusById(businessId, ExpenseReimbursementStatus.EXPIRED.getCode());
     }

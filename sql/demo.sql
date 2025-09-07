@@ -9,7 +9,7 @@ CREATE TABLE `tb_employee_base_info`
     `employee_code`          bigint       NOT NULL COMMENT '员工工号',
     `employee_name`          varchar(32)  NOT NULL COMMENT '姓名',
     `dept_code`              varchar(32)           DEFAULT NULL COMMENT '部门编码',
-    `email`                  varchar(100) NOT NULL COMMENT '邮箱',
+    `email`                  varchar(100) NULL COMMENT '邮箱',
     `gmt_created_time`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `gmt_last_modified_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
     `is_deleted`             tinyint      NOT NULL DEFAULT '0' COMMENT '是否删除(0-未删, 1-已删)',
@@ -45,6 +45,49 @@ CREATE TABLE `tb_department`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci
     COMMENT ='部门信息表';
+
+DROP TABLE IF EXISTS `tb_flowable_process_definition`;
+CREATE TABLE IF NOT EXISTS `tb_flowable_process_definition`
+(
+    `id`                     bigint      NOT NULL COMMENT '主键ID',
+    `process_definition_key` varchar(64) NOT NULL COMMENT '流程定义Key',
+    `process_definition_id`  varchar(128)         DEFAULT NULL COMMENT '流程定义ID',
+    `process_name`           varchar(128)         DEFAULT NULL COMMENT '流程定义名称',
+    `process_version`        int         NOT NULL COMMENT '流程定义版本',
+    `gmt_created_time`       datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `gmt_last_modified_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `is_deleted`             tinyint     NOT NULL DEFAULT '0' COMMENT '是否删除(0-未删, 1-已删)',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uiq_process_definition_key_version` (`process_definition_key`, `process_version`),
+    KEY `idx_process_definition_key` (`process_definition_key`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci
+    COMMENT ='流程定义表';
+
+DROP TABLE IF EXISTS `tb_process`;
+CREATE TABLE IF NOT EXISTS tb_process
+(
+    `id`                     BIGINT PRIMARY KEY COMMENT '流程ID',
+    `process_definition_id`  BIGINT       NOT NULL COMMENT '流程定义ID',
+    `title`                  VARCHAR(256) NOT NULL COMMENT '流程标题 例如：张三',
+    `process_status`         VARCHAR(64)  NOT NULL COMMENT '流程状态（草稿：DRAFT，流程中：IN_PROGRESS，已完成：COMPLETED，已撤销：CANCELED，已废弃：DISCARDED，已过期：EXPIRED）',
+    `business_id`            BIGINT       NULL COMMENT '流程业务ID，对应的业务表的主键ID',
+    `process_instance_id`    VARCHAR(128) NULL COMMENT '流程实例ID',
+    `draft_data`             TEXT         NULL COMMENT '业务数据草稿',
+    `create_by_code`         BIGINT       NULL COMMENT '发起人工号',
+    `create_by_name`         VARCHAR(64)  NULL COMMENT '发起人姓名',
+    `cur_assignee_codes`     VARCHAR(512) NULL COMMENT '当前审批人工号',
+    `cur_assignee_names`     VARCHAR(512) NULL COMMENT '当前审批人姓名',
+    `gmt_created_time`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `gmt_last_modified_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+    `is_deleted`             tinyint      NOT NULL DEFAULT '0' COMMENT '是否删除(0-未删, 1-已删)',
+    UNIQUE KEY `uiq_process_instance_id` (`process_instance_id`),
+    KEY `idx_process_status` (`process_status`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci
+    COMMENT '流程详情表';
 
 
 DROP TABLE IF EXISTS `tb_leave_request`;
@@ -123,44 +166,3 @@ CREATE TABLE IF NOT EXISTS `tb_test_fork_join`
   COLLATE = utf8mb4_unicode_ci
     COMMENT ='测试 ForkJoin 流程表';
 
-DROP TABLE IF EXISTS `tb_flowable_process_definition`;
-CREATE TABLE IF NOT EXISTS `tb_flowable_process_definition`
-(
-    `id`                     bigint      NOT NULL COMMENT '主键ID',
-    `process_definition_key` varchar(64) NOT NULL COMMENT '流程定义Key',
-    `process_name`           varchar(128)         DEFAULT NULL COMMENT '流程定义名称',
-    `process_version`        int         NOT NULL COMMENT '流程定义版本',
-    `gmt_created_time`       datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `gmt_last_modified_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `is_deleted`             tinyint     NOT NULL DEFAULT '0' COMMENT '是否删除(0-未删, 1-已删)',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uiq_process_definition_key_version` (`process_definition_key`, `process_version`),
-    KEY `idx_process_definition_key` (`process_definition_key`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci
-    COMMENT ='流程定义表';
-
-DROP TABLE IF EXISTS `tb_process`;
-CREATE TABLE IF NOT EXISTS tb_process
-(
-    `id`                     BIGINT PRIMARY KEY COMMENT '流程ID',
-    `process_definition_id`  BIGINT       NOT NULL COMMENT '流程定义ID',
-    `title`                  VARCHAR(256) NOT NULL COMMENT '流程标题 例如：张三',
-    `process_status`         VARCHAR(64)  NOT NULL COMMENT '流程状态（草稿：DRAFT，流程中：IN_PROGRESS，已完成：COMPLETED，已撤销：CANCELED，已废弃：DISCARDED，已过期：EXPIRED）',
-    `business_id`            BIGINT       NULL COMMENT '流程业务ID，对应的业务表的主键ID',
-    `process_instance_id`    VARCHAR(128) NULL COMMENT '流程实例ID',
-    `data`                   TEXT         NULL COMMENT '业务数据',
-    `create_by_code`         BIGINT       NULL COMMENT '发起人工号',
-    `create_by_name`         VARCHAR(64)  NULL COMMENT '发起人姓名',
-    `cur_assignee_codes`     VARCHAR(512) NULL COMMENT '当前审批人工号',
-    `cur_assignee_names`     VARCHAR(512) NULL COMMENT '当前审批人姓名',
-    `gmt_created_time`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `gmt_last_modified_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
-    `is_deleted`             tinyint      NOT NULL DEFAULT '0' COMMENT '是否删除(0-未删, 1-已删)',
-    UNIQUE KEY `uiq_process_instance_id` (`process_instance_id`),
-    KEY `idx_process_status` (`process_status`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci
-    COMMENT '流程详情表';

@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -15,7 +14,7 @@ import java.util.Map;
  */
 @Getter
 @AllArgsConstructor
-public class TaskApprovedEvent implements ProcessEvent, Serializable {
+public class TaskApprovedEvent implements ProcessEvent {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -23,8 +22,5 @@ public class TaskApprovedEvent implements ProcessEvent, Serializable {
     private final String processDefinitionKey;
 
     private final Map<String, Object> variables;
-    private final String taskDefinitionKey;
-    private final String taskId;
-    private final Long approverEmpCode;
 
 }

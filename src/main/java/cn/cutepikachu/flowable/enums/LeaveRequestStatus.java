@@ -11,9 +11,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum LeaveRequestStatus {
-    PENDING("PENDING", "待审批"),
-    APPROVED("APPROVED", "已批准"),
-    REJECTED("REJECTED", "已拒绝"),
+    IN_PROCESS("IN_PROCESS", "流程中"),
+    PASSED("PASSED", "已通过"),
+    REJECTED("REJECTED", "未通过"),
     CANCELED("CANCELED", "已撤销"),
     DISCARDED("DISCARDED", "已废弃"),
     EXPIRED("EXPIRED", "已过期");

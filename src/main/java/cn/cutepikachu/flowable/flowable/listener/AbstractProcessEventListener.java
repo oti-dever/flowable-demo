@@ -1,10 +1,7 @@
 package cn.cutepikachu.flowable.flowable.listener;
 
-import cn.cutepikachu.flowable.flowable.IFlowableService;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEvent;
-import org.springframework.context.annotation.Lazy;
 
 import static cn.cutepikachu.flowable.constant.FlowableConstant.BUSINESS_ID;
 
@@ -15,10 +12,6 @@ import static cn.cutepikachu.flowable.constant.FlowableConstant.BUSINESS_ID;
  */
 @Slf4j
 public abstract class AbstractProcessEventListener implements IProcessEventListener {
-
-    @Lazy
-    @Resource
-    protected IFlowableService flowableService;
 
     /**
      * 流程完成事件处理模板方法
@@ -48,7 +41,7 @@ public abstract class AbstractProcessEventListener implements IProcessEventListe
      * @param event      流程完成事件
      * @param businessId 业务ID
      */
-    protected void onProcessCompletedBusiness(FlowableEngineEvent event, Long businessId) {
+    public void onProcessCompletedBusiness(FlowableEngineEvent event, Long businessId) {
     }
 
     /**
@@ -79,7 +72,7 @@ public abstract class AbstractProcessEventListener implements IProcessEventListe
      * @param event      流程删除事件
      * @param businessId 业务ID
      */
-    protected void onProcessDeleteBusiness(FlowableEngineEvent event, Long businessId) {
+    public void onProcessDeleteBusiness(FlowableEngineEvent event, Long businessId) {
     }
 
     /**
@@ -90,9 +83,9 @@ public abstract class AbstractProcessEventListener implements IProcessEventListe
      * @param event 流程事件
      * @return 业务ID
      */
-    protected final Long getBusinessId(FlowableEngineEvent event) {
+    private Long getBusinessId(FlowableEngineEvent event) {
         String executionId = event.getExecutionId();
-        return flowableService.getVariable(executionId, BUSINESS_ID, Long.class);
+        return getFlowableService().getVariable(executionId, BUSINESS_ID, Long.class);
     }
 
 }

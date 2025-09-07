@@ -3,9 +3,9 @@ package cn.cutepikachu.flowable.flowable.listener.task;
 import cn.cutepikachu.flowable.dao.ExpenseReimbursementDAO;
 import cn.cutepikachu.flowable.enums.ExpenseReimbursementStatus;
 import cn.cutepikachu.flowable.flowable.listener.AbstractTaskListener;
+import cn.cutepikachu.flowable.flowable.service.IProcessService;
 import cn.cutepikachu.flowable.flowable.strategy.ApproverSelectStrategyFactory;
 import cn.cutepikachu.flowable.model.entity.ExpenseReimbursement;
-import cn.cutepikachu.flowable.flowable.service.IProcessService;
 import jakarta.annotation.Resource;
 import lombok.Getter;
 import org.flowable.task.service.delegate.DelegateTask;
@@ -30,7 +30,7 @@ public class ExpenseReimbursementTaskListener extends AbstractTaskListener {
 
     @Getter
     @Resource
-    private IProcessService defaultProcessService;
+    private IProcessService processService;
 
     @Resource
     private ExpenseReimbursementDAO expenseReimbursementDAO;
@@ -46,31 +46,22 @@ public class ExpenseReimbursementTaskListener extends AbstractTaskListener {
             case BOSS_TASK -> onBossApprovalTaskCreate(delegateTask, erId);
             // 财务审批任务
             case FINANCE_TASK -> onFinanceApprovalTaskCreate(delegateTask, erId);
-            // 重新提交任务
-            case RE_SUBMIT_TASK -> onReSubmitTaskCreate(delegateTask, erId);
         }
     }
 
     private void onDeptLeaderApprovalTaskCreate(DelegateTask delegateTask, Long erId) {
-        expenseReimbursementDAO.updateStatusById(erId, ExpenseReimbursementStatus.PENDING_DEPT_APPROVAL.getCode());
         String assignee = delegateTask.getAssignee();
         expenseReimbursementDAO.updateDeptLeaderById(erId, assignee);
     }
 
     private void onBossApprovalTaskCreate(DelegateTask delegateTask, Long erId) {
-        expenseReimbursementDAO.updateStatusById(erId, ExpenseReimbursementStatus.PENDING_BOSS_APPROVAL.getCode());
         String assignee = delegateTask.getAssignee();
         expenseReimbursementDAO.updateBossById(erId, assignee);
     }
 
     private void onFinanceApprovalTaskCreate(DelegateTask delegateTask, Long erId) {
-        expenseReimbursementDAO.updateStatusById(erId, ExpenseReimbursementStatus.PENDING_FINANCE_APPROVAL.getCode());
         String assignee = delegateTask.getAssignee();
         expenseReimbursementDAO.updateFinanceById(erId, assignee);
-    }
-
-    private void onReSubmitTaskCreate(DelegateTask delegateTask, Long erId) {
-        expenseReimbursementDAO.updateStatusById(erId, ExpenseReimbursementStatus.RE_SUBMIT.getCode());
     }
 
     @Override
@@ -79,38 +70,36 @@ public class ExpenseReimbursementTaskListener extends AbstractTaskListener {
         Long erId = delegateTask.getVariable(BUSINESS_ID, Long.class);
         ExpenseReimbursement er = expenseReimbursementDAO.getById(erId);
         String comment = delegateTask.getVariable(APPROVAL_COMMENT, String.class);
+        Boolean approved = delegateTask.getVariable(taskKey + "_approved", Boolean.class);
         switch (taskKey) {
             // 部门负责人审批任务
-            case DEPT_LEADER_TASK -> onDeptLeaderApprovalTaskComplete(delegateTask, er, comment);
+            case DEPT_LEADER_TASK -> onDeptLeaderApprovalTaskComplete(delegateTask, er, approved, comment);
             // 老板审批任务
-            case BOSS_TASK -> onBossApprovalTaskComplete(delegateTask, er, comment);
+            case BOSS_TASK -> onBossApprovalTaskComplete(delegateTask, er, approved, comment);
             // 财务审批任务
-            case FINANCE_TASK -> onFinanceApprovalTaskComplete(delegateTask, er, comment);
+            case FINANCE_TASK -> onFinanceApprovalTaskComplete(delegateTask, er, approved, comment);
         }
     }
 
-    private void onDeptLeaderApprovalTaskComplete(DelegateTask delegateTask, ExpenseReimbursement er, String comment) {
-        Boolean approved = delegateTask.getVariable(APPROVED_DEPT_LEADER, Boolean.class);
-        String newStatus = approved ?
-                ExpenseReimbursementStatus.PENDING_BOSS_APPROVAL.getCode() : ExpenseReimbursementStatus.RE_SUBMIT.getCode();
+    private void onDeptLeaderApprovalTaskComplete(DelegateTask delegateTask, ExpenseReimbursement er, Boolean approved, String comment) {
+        if (!approved) {
+            expenseReimbursementDAO.updateStatusById(er.getId(), ExpenseReimbursementStatus.REJECTED.getCode());
+        }
         expenseReimbursementDAO.updateApprovalTimeById(er.getId(), LocalDateTime.now(), null, null);
-        expenseReimbursementDAO.updateStatusById(er.getId(), newStatus);
         expenseReimbursementDAO.updateApprovalCommentById(er.getId(), comment, null, null);
     }
 
-    private void onBossApprovalTaskComplete(DelegateTask delegateTask, ExpenseReimbursement er, String comment) {
-        Boolean approved = delegateTask.getVariable(APPROVED_BOSS, Boolean.class);
-        String newStatus = approved ?
-                ExpenseReimbursementStatus.PENDING_FINANCE_APPROVAL.getCode() : ExpenseReimbursementStatus.RE_SUBMIT.getCode();
+    private void onBossApprovalTaskComplete(DelegateTask delegateTask, ExpenseReimbursement er, Boolean approved, String comment) {
+        if (!approved) {
+            expenseReimbursementDAO.updateStatusById(er.getId(), ExpenseReimbursementStatus.REJECTED.getCode());
+        }
         expenseReimbursementDAO.updateApprovalTimeById(er.getId(), er.getDeptApprovalTime(), LocalDateTime.now(), null);
-        expenseReimbursementDAO.updateStatusById(er.getId(), newStatus);
         expenseReimbursementDAO.updateApprovalCommentById(er.getId(), er.getDeptApprovalComment(), comment, null);
     }
 
-    private void onFinanceApprovalTaskComplete(DelegateTask delegateTask, ExpenseReimbursement er, String comment) {
-        Boolean approved = delegateTask.getVariable(APPROVED_FINANCE, Boolean.class);
+    private void onFinanceApprovalTaskComplete(DelegateTask delegateTask, ExpenseReimbursement er, Boolean approved, String comment) {
         String newStatus = approved ?
-                ExpenseReimbursementStatus.COMPLETED.getCode() : ExpenseReimbursementStatus.RE_SUBMIT.getCode();
+                ExpenseReimbursementStatus.PASSED.getCode() : ExpenseReimbursementStatus.REJECTED.getCode();
         expenseReimbursementDAO.updateApprovalTimeById(er.getId(), er.getDeptApprovalTime(), er.getBossApprovalTime(), LocalDateTime.now());
         expenseReimbursementDAO.updateStatusById(er.getId(), newStatus);
         expenseReimbursementDAO.updateApprovalCommentById(er.getId(), er.getDeptApprovalComment(), er.getBossApprovalComment(), comment);

@@ -9,7 +9,7 @@
         <result column="process_instance_id" property="processInstanceId"/>
         <result column="title" property="title"/>
         <result column="process_status" property="processStatus"/>
-        <result column="data" property="data"/>
+        <result column="draft_data" property="draftData"/>
         <result column="create_by_code" property="createByCode"/>
         <result column="create_by_name" property="createByName"/>
         <result column="cur_approval_codes" property="curApprovalCodes"/>
@@ -25,7 +25,7 @@
         `process_instance_id`,
         `title`,
         `process_status`,
-        `data`,
+        `draft_data`,
         `create_by_code`,
         `create_by_name`,
         `cur_approval_codes`,

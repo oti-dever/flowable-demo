@@ -50,9 +50,14 @@ public class ProcessVO implements Serializable {
     private String processStatus;
 
     /**
+     * 业务数据草稿
+     */
+    private String draftData;
+
+    /**
      * 业务数据
      */
-    private String data;
+    private Object businessData;
 
     /**
      * 发起人工号

@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 /**
  * @author <a href="https://github.com/cutepikachu-cn">笨蛋皮卡丘</a>
- * @description
+ * @description 流程撤销 DTO
  * @since 2025/9/2 09:34:33
  */
 @Data
@@ -17,9 +17,6 @@ public class ProcessCancelDTO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
-
-    @NotNull(message = "流程ID不能为空")
-    private Long processId;
 
     /**
      * TODO 通过用户上下文获取

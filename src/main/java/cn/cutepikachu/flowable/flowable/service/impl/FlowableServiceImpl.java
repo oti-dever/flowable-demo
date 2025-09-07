@@ -1,7 +1,7 @@
-package cn.cutepikachu.flowable.flowable.impl;
+package cn.cutepikachu.flowable.flowable.service.impl;
 
 import cn.cutepikachu.flowable.dao.FlowableProcessDefinitionDAO;
-import cn.cutepikachu.flowable.flowable.IFlowableService;
+import cn.cutepikachu.flowable.flowable.service.IFlowableService;
 import cn.cutepikachu.flowable.model.entity.FlowableProcessDefinition;
 import jakarta.annotation.Resource;
 import org.flowable.engine.RuntimeService;

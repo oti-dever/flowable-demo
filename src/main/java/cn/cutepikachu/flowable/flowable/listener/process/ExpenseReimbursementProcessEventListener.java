@@ -1,7 +1,7 @@
 package cn.cutepikachu.flowable.flowable.listener.process;
 
-import cn.cutepikachu.flowable.dao.TestForkJoinDAO;
-import cn.cutepikachu.flowable.enums.TestForkJoinStatusEnum;
+import cn.cutepikachu.flowable.dao.ExpenseReimbursementDAO;
+import cn.cutepikachu.flowable.enums.ExpenseReimbursementStatus;
 import cn.cutepikachu.flowable.flowable.listener.AbstractProcessEventListener;
 import cn.cutepikachu.flowable.flowable.service.IFlowableService;
 import jakarta.annotation.Resource;
@@ -10,16 +10,16 @@ import org.flowable.common.engine.api.delegate.event.FlowableEngineEvent;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import static cn.cutepikachu.flowable.constant.FlowableConstant.TestForkJoin.APPROVED;
-import static cn.cutepikachu.flowable.constant.FlowableConstant.TestForkJoin.PROC_DEF_KEY;
+import static cn.cutepikachu.flowable.constant.FlowableConstant.ExpenseReimbursement.APPROVED;
+import static cn.cutepikachu.flowable.constant.FlowableConstant.ExpenseReimbursement.PROC_DEF_KEY;
 
 /**
  * @author <a href="https://github.com/cutepikachu-cn">笨蛋皮卡丘</a>
  * @description
- * @since 2025/9/4 09:49:43
+ * @since 2025/9/6 17:07:37
  */
 @Component
-public class TestForkJoinProcessEventListener extends AbstractProcessEventListener {
+public class ExpenseReimbursementProcessEventListener extends AbstractProcessEventListener {
 
     @Lazy
     @Getter
@@ -27,20 +27,20 @@ public class TestForkJoinProcessEventListener extends AbstractProcessEventListen
     private IFlowableService flowableService;
 
     @Resource
-    private TestForkJoinDAO testForkJoinDAO;
+    private ExpenseReimbursementDAO expenseReimbursementDAO;
 
     @Override
     public void onProcessCompletedBusiness(FlowableEngineEvent event, Long businessId) {
-        testForkJoinDAO.updateStatusById(businessId, TestForkJoinStatusEnum.PASSED.getCode());
+        expenseReimbursementDAO.updateStatusById(businessId, ExpenseReimbursementStatus.PASSED.getCode());
     }
 
     @Override
     public void onProcessDeleteBusiness(FlowableEngineEvent event, Long businessId) {
         String executionId = event.getExecutionId();
         Boolean approved = flowableService.getVariable(executionId, APPROVED, Boolean.class);
-        TestForkJoinStatusEnum status = approved ?
-                TestForkJoinStatusEnum.PASSED : TestForkJoinStatusEnum.REJECTED;
-        testForkJoinDAO.updateStatusById(businessId, status.getCode());
+        ExpenseReimbursementStatus status = approved ?
+                ExpenseReimbursementStatus.PASSED : ExpenseReimbursementStatus.REJECTED;
+        expenseReimbursementDAO.updateStatusById(businessId, status.getCode());
     }
 
     @Override

@@ -27,6 +27,11 @@ public class FlowableProcessDefinitionVO implements Serializable {
     private String processDefinitionKey;
 
     /**
+     * 流程定义ID
+     */
+    private String processDefinitionId;
+
+    /**
      * 流程定义名称
      */
     private String processName;

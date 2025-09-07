@@ -14,7 +14,7 @@ public interface ITaskListener extends TaskListener {
 
     ApproverSelectStrategyFactory getApproverSelectStrategyFactory();
 
-    IProcessService getDefaultProcessService();
+    IProcessService getProcessService();
 
     /**
      * 任务创建

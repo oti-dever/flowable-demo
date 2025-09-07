@@ -3,28 +3,22 @@ package cn.cutepikachu.flowable.service.impl;
 import cn.cutepikachu.flowable.constant.FlowableConstant;
 import cn.cutepikachu.flowable.dao.EmployeeBaseInfoDAO;
 import cn.cutepikachu.flowable.dao.LeaveRequestDAO;
-import cn.cutepikachu.flowable.dao.ProcessDAO;
 import cn.cutepikachu.flowable.enums.ApproverSelectStrategyEnum;
 import cn.cutepikachu.flowable.enums.LeaveRequestStatus;
 import cn.cutepikachu.flowable.enums.error.ProcessErrorEnum;
 import cn.cutepikachu.flowable.exception.BusinessException;
-import cn.cutepikachu.flowable.flowable.IFlowableService;
 import cn.cutepikachu.flowable.flowable.event.impl.ProcessStartedEvent;
 import cn.cutepikachu.flowable.flowable.event.impl.TaskApprovedEvent;
-import cn.cutepikachu.flowable.model.dto.LeaveRequestApproveDTO;
 import cn.cutepikachu.flowable.model.dto.LeaveRequestCreateDTO;
+import cn.cutepikachu.flowable.model.dto.ProcessTaskApproveDTO;
 import cn.cutepikachu.flowable.model.entity.EmployeeBaseInfo;
 import cn.cutepikachu.flowable.model.entity.LeaveRequest;
-import cn.cutepikachu.flowable.model.entity.Process;
 import cn.cutepikachu.flowable.model.vo.LeaveRequestVO;
-import cn.cutepikachu.flowable.flowable.service.AbstractProcessService;
 import cn.cutepikachu.flowable.service.LeaveRequestService;
 import cn.cutepikachu.flowable.util.ListOfTypeUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import jakarta.annotation.Resource;
-import lombok.Getter;
-import org.flowable.task.api.Task;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -32,7 +26,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import static cn.cutepikachu.flowable.constant.FlowableConstant.EXPIRE_DURATION;
 import static cn.cutepikachu.flowable.constant.FlowableConstant.LeaveRequest.*;
@@ -44,19 +37,8 @@ import static cn.cutepikachu.flowable.constant.FlowableConstant.STARTER;
  * @since 2025/8/26 17:25:00
  */
 @Service
-public class LeaveRequestServiceImpl
-        extends AbstractProcessService
-        implements LeaveRequestService {
+public class LeaveRequestServiceImpl implements LeaveRequestService {
 
-    @Getter
-    @Resource
-    private ProcessDAO processDAO;
-
-    @Getter
-    @Resource
-    private IFlowableService flowableService;
-
-    @Getter
     @Resource
     private EmployeeBaseInfoDAO employeeBaseInfoDAO;
 
@@ -64,11 +46,25 @@ public class LeaveRequestServiceImpl
     private LeaveRequestDAO leaveRequestDAO;
 
     @Override
+    public String getProcessDefinitionKey() {
+        return PROC_DEF_KEY;
+    }
+
+    @Override
+    public Object getByBusinessData(Long businessId) {
+        LeaveRequest lr = leaveRequestDAO.getById(businessId);
+        if (lr == null) {
+            throw new BusinessException(ProcessErrorEnum.PROCESS_NOT_FOUND);
+        }
+        return toVO(lr);
+    }
+
+    @Override
     public <T> ProcessStartedEvent startProcessBusiness(Long processId, T startDTO) {
         LeaveRequestCreateDTO dto;
         try {
-            dto = (LeaveRequestCreateDTO) startDTO;
-        } catch (ClassCastException e) {
+            dto = BeanUtil.toBean(startDTO, LeaveRequestCreateDTO.class);
+        } catch (Exception e) {
             throw new BusinessException("参数类型错误");
         }
         validateCreate(dto);
@@ -88,7 +84,7 @@ public class LeaveRequestServiceImpl
         entity.setReason(dto.getReason());
         entity.setAttachments(dto.getAttachments());
         entity.setCcEmpCodes(dto.getCcEmpCodes());
-        entity.setStatus(LeaveRequestStatus.PENDING.getCode());
+        entity.setStatus(LeaveRequestStatus.IN_PROCESS.getCode());
 
         boolean saved = leaveRequestDAO.save(entity);
         if (!saved) {
@@ -128,13 +124,6 @@ public class LeaveRequestServiceImpl
         if (lr == null) {
             throw new BusinessException(ProcessErrorEnum.PROCESS_NOT_FOUND);
         }
-        // TODO 用户上下文获取申请人工号
-        // if (!Objects.equals(lr.getApplicantEmpCode(), dto.getApplicantEmpCode())) {
-        //     throw new BusinessException(ProcessErrorEnum.NO_PERMISSION);
-        // }
-        if (!Objects.equals(lr.getStatus(), LeaveRequestStatus.PENDING.getCode())) {
-            throw new BusinessException(ProcessErrorEnum.PROCESS_CANNOT_CANCELLED);
-        }
 
         leaveRequestDAO.updateStatusById(businessId, LeaveRequestStatus.CANCELED.getCode());
         return Boolean.TRUE;
@@ -146,56 +135,26 @@ public class LeaveRequestServiceImpl
         if (lr == null) {
             throw new BusinessException(ProcessErrorEnum.PROCESS_NOT_FOUND);
         }
-        if (!Objects.equals(lr.getStatus(), LeaveRequestStatus.PENDING.getCode())) {
-            throw new BusinessException(ProcessErrorEnum.PROCESS_CANNOT_DISCARD);
-        }
 
         leaveRequestDAO.updateStatusById(businessId, LeaveRequestStatus.DISCARDED.getCode());
         return Boolean.TRUE;
     }
 
     @Override
-    public <T> TaskApprovedEvent approveTaskBusiness(Long businessId, T approveDTO) {
-        LeaveRequestApproveDTO dto;
-        try {
-            dto = (LeaveRequestApproveDTO) approveDTO;
-        } catch (ClassCastException e) {
-            throw new BusinessException("参数类型错误");
-        }
+    public TaskApprovedEvent approveTaskBusiness(Long businessId, ProcessTaskApproveDTO dto) {
         LeaveRequest lr = leaveRequestDAO.getById(businessId);
         if (lr == null) {
             throw new BusinessException(ProcessErrorEnum.PROCESS_NOT_FOUND);
         }
-        if (!Objects.equals(lr.getStatus(), LeaveRequestStatus.PENDING.getCode())) {
-            throw new BusinessException(ProcessErrorEnum.PROCESS_CANNOT_APPROVED);
-        }
-
-        // 查找对应的任务
-        Process process = processDAO.getByBusinessId(lr.getId());
-        Task task = flowableService.getTask(process.getProcessInstanceId(), dto.getApprovalTask());
-        if (task == null) {
-            throw new BusinessException(ProcessErrorEnum.TASK_NOT_FOUND);
-        }
 
         // 构建流程变量
-        Map<String, Object> variables = Map.of(APPROVED, dto.getApproved());
+        Map<String, Object> variables = new HashMap<>();
+        variables.put(APPROVED, dto.getApproved());
 
         return new TaskApprovedEvent(
                 PROC_DEF_KEY,
-                variables,
-                task.getTaskDefinitionKey(),
-                task.getId(),
-                dto.getApproverEmpCode()
+                variables
         );
-    }
-
-    @Override
-    public LeaveRequestVO getById(Long id) {
-        LeaveRequest lr = leaveRequestDAO.getById(id);
-        if (lr == null) {
-            throw new BusinessException(ProcessErrorEnum.PROCESS_NOT_FOUND);
-        }
-        return toVO(lr);
     }
 
     private void validateCreate(LeaveRequestCreateDTO dto) {

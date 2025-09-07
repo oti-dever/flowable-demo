@@ -1,7 +1,10 @@
 package cn.cutepikachu.flowable.flowable.listener.manager;
 
+import cn.cutepikachu.flowable.dao.FlowableProcessDefinitionDAO;
 import cn.cutepikachu.flowable.flowable.listener.IProcessEventListener;
+import cn.cutepikachu.flowable.model.entity.FlowableProcessDefinition;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEntityEvent;
 import org.flowable.engine.delegate.event.FlowableCancelledEvent;
@@ -35,6 +38,9 @@ public class ProcessEventListenerManager {
      */
     private List<IProcessEventListener> specificProcessEventListeners;
 
+    @Resource
+    private FlowableProcessDefinitionDAO flowableProcessDefinitionDAO;
+
     /**
      * 注入所有实现了ISpecificProcessEventListener接口的Bean
      */
@@ -55,44 +61,43 @@ public class ProcessEventListenerManager {
 
         // 按流程定义Key分组
         listenerMap.putAll(
-            specificProcessEventListeners.stream()
-                .collect(Collectors.groupingBy(IProcessEventListener::getProcessDefinitionKey))
+                specificProcessEventListeners.stream()
+                        .collect(Collectors.groupingBy(IProcessEventListener::getProcessDefinitionKey))
         );
 
-        log.info("已注册特定流程事件监听器: {}", 
-            listenerMap.entrySet().stream()
-                .collect(Collectors.toMap(
-                    Map.Entry::getKey, 
-                    entry -> entry.getValue().size()
-                ))
+        log.info("已注册特定流程事件监听器: {}",
+                listenerMap.entrySet().stream()
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                entry -> entry.getValue().size()
+                        ))
         );
     }
 
     /**
      * 处理流程完成事件
-     * 
+     *
      * @param event 流程完成事件
      */
     public void handleProcessCompletedBusiness(FlowableEngineEntityEvent event) {
-        String processDefinitionKey = extractProcessDefinitionKey(event.getProcessDefinitionId());
+        String processDefinitionId = event.getProcessDefinitionId();
+        FlowableProcessDefinition flowableProcessDefinition = flowableProcessDefinitionDAO.getByProcessDefinitionId(processDefinitionId);
+        String processDefinitionKey = flowableProcessDefinition.getProcessDefinitionKey();
         String processInstanceId = event.getProcessInstanceId();
-        
+
         List<IProcessEventListener> listeners = listenerMap.get(processDefinitionKey);
         if (listeners == null || listeners.isEmpty()) {
-            log.debug("流程定义Key [{}] 没有注册特定流程事件监听器", processDefinitionKey);
             return;
         }
 
         for (IProcessEventListener listener : listeners) {
             try {
-                if (listener.shouldHandle(processDefinitionKey)) {
-                    log.debug("执行流程完成监听器: {} for 流程实例: {}", 
+                log.debug("执行流程完成监听器: {} for 流程实例: {}",
                         listener.getClass().getSimpleName(), processInstanceId);
-                    listener.onProcessCompletedBusiness(event);
-                }
+                listener.onProcessCompletedBusiness(event);
             } catch (Exception e) {
-                log.error("执行流程完成监听器失败: {} for 流程实例: {}", 
-                    listener.getClass().getSimpleName(), processInstanceId, e);
+                log.error("执行流程完成监听器失败: {} for 流程实例: {}",
+                        listener.getClass().getSimpleName(), processInstanceId, e);
                 // 继续执行其他监听器，不因为一个监听器失败而影响其他监听器
             }
         }
@@ -104,22 +109,21 @@ public class ProcessEventListenerManager {
      * @param event 流程删除事件
      */
     public void handleProcessCancelledBusiness(FlowableCancelledEvent event) {
-        String processDefinitionKey = extractProcessDefinitionKey(event.getProcessDefinitionId());
+        String processDefinitionId = event.getProcessDefinitionId();
+        FlowableProcessDefinition flowableProcessDefinition = flowableProcessDefinitionDAO.getByProcessDefinitionId(processDefinitionId);
+        String processDefinitionKey = flowableProcessDefinition.getProcessDefinitionKey();
         String processInstanceId = event.getProcessInstanceId();
 
         List<IProcessEventListener> listeners = listenerMap.get(processDefinitionKey);
         if (listeners == null || listeners.isEmpty()) {
-            log.debug("流程定义Key [{}] 没有注册特定流程事件监听器", processDefinitionKey);
             return;
         }
 
         for (IProcessEventListener listener : listeners) {
             try {
-                if (listener.shouldHandle(processDefinitionKey)) {
-                    log.debug("执行流程删除监听器: {} for 流程实例: {}",
-                            listener.getClass().getSimpleName(), processInstanceId);
-                    listener.onProcessDeleteBusiness(event);
-                }
+                log.debug("执行流程删除监听器: {} for 流程实例: {}",
+                        listener.getClass().getSimpleName(), processInstanceId);
+                listener.onProcessDeleteBusiness(event);
             } catch (Exception e) {
                 log.error("执行流程删除监听器失败: {} for 流程实例: {}",
                         listener.getClass().getSimpleName(), processInstanceId, e);
@@ -129,28 +133,8 @@ public class ProcessEventListenerManager {
     }
 
     /**
-     * 从流程定义ID中提取流程定义Key
-     * 流程定义ID格式通常为: processKey:version:deploymentId
-     * 
-     * @param processDefinitionId 流程定义ID
-     * @return 流程定义Key
-     */
-    private String extractProcessDefinitionKey(String processDefinitionId) {
-        if (processDefinitionId == null) {
-            return null;
-        }
-        
-        int firstColonIndex = processDefinitionId.indexOf(':');
-        if (firstColonIndex > 0) {
-            return processDefinitionId.substring(0, firstColonIndex);
-        }
-        
-        return processDefinitionId;
-    }
-
-    /**
      * 获取指定流程定义Key的监听器数量
-     * 
+     *
      * @param processDefinitionKey 流程定义Key
      * @return 监听器数量
      */
@@ -161,7 +145,7 @@ public class ProcessEventListenerManager {
 
     /**
      * 获取所有已注册的流程定义Key
-     * 
+     *
      * @return 流程定义Key集合
      */
     public Set<String> getRegisteredProcessDefinitionKeys() {

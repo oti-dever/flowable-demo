@@ -17,8 +17,41 @@ import java.util.List;
 @Service
 public class FlowableProcessDefinitionDAO extends ServiceImpl<FlowableProcessDefinitionMapper, FlowableProcessDefinition> {
 
+    /**
+     * 根据流程定义ID获取流程定义
+     */
+    public FlowableProcessDefinition getByProcessDefinitionId(String processDefinitionId) {
+        return lambdaQuery()
+                .eq(FlowableProcessDefinition::getProcessDefinitionId, processDefinitionId)
+                .one();
+    }
+
+    /**
+     * 获取最新版本的流程定义列表
+     */
     public List<FlowableProcessDefinition> listLatestProcessDefinition() {
         return baseMapper.listLatestProcessDefinition();
+    }
+
+    /**
+     * 根据流程定义Key获取流程最新定义
+     */
+    public FlowableProcessDefinition getLatestByProcessDefinitionKey(String processDefinitionKey) {
+        return lambdaQuery()
+                .eq(FlowableProcessDefinition::getProcessDefinitionKey, processDefinitionKey)
+                .orderByDesc(FlowableProcessDefinition::getProcessVersion)
+                .last("LIMIT 1")
+                .one();
+    }
+
+    /**
+     * 根据流程定义Key和版本获取流程定义
+     */
+    public FlowableProcessDefinition getByProcessDefinitionKeyAndVersion(String processDefinitionKey, Integer processVersion) {
+        return lambdaQuery()
+                .eq(FlowableProcessDefinition::getProcessDefinitionKey, processDefinitionKey)
+                .eq(FlowableProcessDefinition::getProcessVersion, processVersion)
+                .one();
     }
 
     public void saveProcessDefinitions(List<ProcessDefinition> processDefinitions) {
@@ -35,6 +68,7 @@ public class FlowableProcessDefinitionDAO extends ServiceImpl<FlowableProcessDef
             }
             FlowableProcessDefinition flowableProcessDefinition = FlowableProcessDefinition.builder()
                     .processDefinitionKey(processDefinition.getKey())
+                    .processDefinitionId(processDefinition.getId())
                     .processName(processDefinition.getName())
                     .processVersion(processDefinition.getVersion())
                     .build();
@@ -43,27 +77,6 @@ public class FlowableProcessDefinitionDAO extends ServiceImpl<FlowableProcessDef
         if (!flowableProcessDefinitions.isEmpty()) {
             saveBatch(flowableProcessDefinitions);
         }
-    }
-
-    /**
-     * 根据流程定义Key获取流程定义
-     */
-    public FlowableProcessDefinition getByProcessDefinitionKey(String processDefinitionKey) {
-        return lambdaQuery()
-                .eq(FlowableProcessDefinition::getProcessDefinitionKey, processDefinitionKey)
-                .orderByDesc(FlowableProcessDefinition::getProcessVersion)
-                .last("LIMIT 1")
-                .one();
-    }
-
-    /**
-     * 根据流程定义Key和版本获取流程定义
-     */
-    public FlowableProcessDefinition getByProcessDefinitionKeyAndVersion(String processDefinitionKey, Integer processVersion) {
-        return lambdaQuery()
-                .eq(FlowableProcessDefinition::getProcessDefinitionKey, processDefinitionKey)
-                .eq(FlowableProcessDefinition::getProcessVersion, processVersion)
-                .one();
     }
 
 }
